@@ -1,0 +1,64 @@
+---
+title: "Project 1"
+author: "Ethan Nguyen"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Project
+
+## The Nticket Function code
+```{r}
+ntickets = function(N,gamma,p){
+  # sequence of n values
+  nvalues = seq(N, floor(N+0.1* N), by = 1)
+
+  # Objective function for discrete distribution
+  objdis <- 1 - gamma - pbinom(q = N,
+                               size = nvalues,
+                               prob = p)
+
+  # Objective function for continuous distribution
+  objcon <- function(nvalues) {
+    1 - gamma - pnorm(N + 0.5,
+                      nvalues * p,
+                      sqrt(nvalues * p * (1 - p)))
+  }
+
+  # Number of tickets sold for discrete
+  nd = nvalues[which.min(abs(objdis))]
+
+  # Number of tickets sold for continuous
+  nc = optimize(f = function(x) abs(objcon(x)), interval = nvalues)$minimum
+
+  # Discrete graph
+  plot(x=nvalues, y = objdis, type = 'b',
+       main = paste("Objective vs n to find optimal tickets sold\n(",nd,") gamma=",
+                    gamma, "N=",N, "discrete"), ylab = "Objective", xlab="n", bg = "blue",pch=21)
+  abline(v = nd, h = 0, col = "red")
+
+  # Continuous graph
+  curve(objcon(x), N, floor(N + 0.1 * N),
+        main = paste("Objective vs n to find optimal tickets sold\n(",nc,") gamma=",
+                     gamma, "N=", N, "continuous"), ylab = "Objective", xlab = "n")
+  abline(v = nc, h = 0, col = "blue")
+
+  #print list
+  print(list(nd = nd, nc = nc, N = N, p = p, gamma = gamma))
+}
+```
+
+
+## Calling the function from my package
+```{r}
+library(MATH4753nguy0585FA2024)
+
+MATH4753nguy0585FA2024::ntickets(N=400,gamma=0.02,p=0.95)
+```
